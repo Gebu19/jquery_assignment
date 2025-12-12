@@ -17,7 +17,7 @@
       }
 
       .error-border {
-        border-color: red !important; /* Force red border for inputs */
+        border-color: red !important;
       }
     </style>
   </head>
@@ -116,30 +116,26 @@
 
     <script>
       $(document).ready(function () {
-        // Attach event listener to the Submit button
         $("#submitBtn").on("click", function (e) {
-          e.preventDefault(); // Stop the default form submission
+          e.preventDefault();
           validateForm();
         });
 
         function resetValidation() {
-          // Clear all previous error states and messages
           $(".form-control, .form-select").removeClass("error-border");
           $(".error-text").text("");
         }
 
         function validateForm() {
           let isValid = true;
-          resetValidation(); // Start by clearing all previous errors
+          resetValidation();
 
-          // --- Helper function to display input error ---
           const displayInputError = (fieldId, message) => {
             $("#" + fieldId).addClass("error-border");
             $("#" + fieldId + "-error").text(message);
             isValid = false;
           };
 
-          // --- Requirement 1: Empty Field Validation (Username, Email, Password, Confirm Password) ---
           const fields = ["username", "email", "password", "confirmPassword"];
 
           $.each(fields, function (index, fieldId) {
@@ -152,56 +148,41 @@
             }
           });
 
-          // --- Requirement 2: Interesting Topics Validation ---
           if ($(".topic:checked").length === 0) {
             $("#topics-error").text("At least one topic must be selected");
             isValid = false;
           }
 
-          // --- Requirement 3: Gender Dropdown Validation ---
           const $genderSelect = $("#gender");
-          // Check if the default first option is selected (assuming value is '--' or a similar placeholder)
+
           if ($genderSelect.val() === "--") {
             $("#gender-error").text("Please choose your gender");
             $genderSelect.addClass("error-border");
             isValid = false;
           }
 
-          // --- Requirement 4: Confirmed Password Match Validation ---
           const password = $("#password").val();
           const confirmPassword = $("#confirmPassword").val();
           const $confirmInput = $("#confirmPassword");
 
-          // This final block handles the logic for the Confirm Password field:
           if (confirmPassword.trim() === "") {
-            // If empty, the first loop already handled it, but we ensure the message is correct.
             displayInputError(
               "confirmPassword",
               "this field must not be empty"
             );
           } else if (password !== confirmPassword) {
-            // If not empty, but mismatch
             displayInputError(
               "confirmPassword",
               "confirmed password mismatched the password"
             );
           } else {
-            // If not empty AND matches, ensure no error is displayed
-            // (If the first loop set isValid=false for another field, it remains false)
             $("#confirmPassword").removeClass("error-border");
             $("#confirmPassword-error").text("");
           }
 
-          // --- Successful Submission (NO alert as requested) ---
           if (isValid) {
-            // Form is successfully validated.
-            // In a real application, the form would be submitted here:
-            // $('#registrationForm').submit();
-
-            // For this assignment, we simply end the validation function successfully.
             console.log("Form validated successfully.");
           } else {
-            // For better UX, focus on the first invalid field
             $(".error-border").first().focus();
           }
         }
