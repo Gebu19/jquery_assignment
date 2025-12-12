@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Interactive Web Form Assignment</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+    <style>
+      .error-text {
+        color: red;
+        font-size: 0.9rem;
+        margin-top: 3px;
+      }
+
+      .error-border {
+        border-color: red !important; /* Force red border for inputs */
+      }
+    </style>
+  </head>
+  <body class="bg-light">
+    <div class="container mt-5">
+      <div class="card shadow">
+        <div class="card-body">
+          <h3 class="mb-4">Interactive Web Form</h3>
+
+          <form id="registrationForm">
+            <div class="mb-3" id="username-group">
+              <label class="form-label">Username</label>
+              <input type="text" id="username" class="form-control" />
+              <div id="username-error" class="error-text"></div>
+            </div>
+
+            <div class="mb-3" id="email-group">
+              <label class="form-label">Email</label>
+              <input type="email" id="email" class="form-control" />
+              <div id="email-error" class="error-text"></div>
+            </div>
+
+            <div class="mb-3" id="password-group">
+              <label class="form-label">Password</label>
+              <input type="password" id="password" class="form-control" />
+              <div id="password-error" class="error-text"></div>
+            </div>
+
+            <div class="mb-3" id="confirmPassword-group">
+              <label class="form-label">Confirm Password</label>
+              <input
+                type="password"
+                id="confirmPassword"
+                class="form-control"
+              />
+              <div id="confirmPassword-error" class="error-text"></div>
+            </div>
+
+            <div class="mb-3" id="topics-group">
+              <label class="form-label fw-bold">Interesting Topics</label>
+              <span id="topics-error" class="error-text ms-2"></span>
+              <div class="form-check">
+                <input
+                  class="form-check-input topic"
+                  type="checkbox"
+                  id="topic1"
+                  value="HTML"
+                />
+                <label class="form-check-label" for="topic1">HTML</label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input topic"
+                  type="checkbox"
+                  id="topic2"
+                  value="CSS"
+                />
+                <label class="form-check-label" for="topic2">CSS</label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input topic"
+                  type="checkbox"
+                  id="topic3"
+                  value="JavaScript"
+                />
+                <label class="form-check-label" for="topic3">JavaScript</label>
+              </div>
+            </div>
+
+            <div class="mb-3" id="gender-group">
+              <label class="form-label fw-bold">Gender</label>
+              <span id="gender-error" class="error-text ms-2"></span>
+              <select id="gender" class="form-select">
+                <option value="">-- please choose your gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn btn-primary">
+              Submit
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+      crossorigin="anonymous"
+    ></script>
+
+    <script>
+      $(document).ready(function () {
+        // Attach event listener to the Submit button
+        $("#submitBtn").on("click", function (e) {
+          e.preventDefault(); // Stop the default form submission
+          validateForm();
+        });
+
+        function resetValidation() {
+          // Clear all previous error states and messages
+          $(".form-control, .form-select").removeClass("error-border");
+          $(".error-text").text("");
+        }
+
+        function validateForm() {
+          let isValid = true;
+          resetValidation(); // Start by clearing all previous errors
+
+          // --- Helper function to display input error ---
+          const displayInputError = (fieldId, message) => {
+            $("#" + fieldId).addClass("error-border");
+            $("#" + fieldId + "-error").text(message);
+            isValid = false;
+          };
+
+          // --- Requirement 1: Empty Field Validation (Username, Email, Password, Confirm Password) ---
+          const fields = ["username", "email", "password", "confirmPassword"];
+
+          $.each(fields, function (index, fieldId) {
+            if (
+              $("#" + fieldId)
+                .val()
+                .trim() === ""
+            ) {
+              displayInputError(fieldId, "this field must not be empty");
+            }
+          });
+
+          // --- Requirement 2: Interesting Topics Validation ---
+          if ($(".topic:checked").length === 0) {
+            $("#topics-error").text("At least one topic must be selected");
+            isValid = false;
+          }
+
+          // --- Requirement 3: Gender Dropdown Validation ---
+          const $genderSelect = $("#gender");
+          // Check if the default first option is selected (assuming value is '--' or a similar placeholder)
+          if ($genderSelect.val() === "--") {
+            $("#gender-error").text("Please choose your gender");
+            $genderSelect.addClass("error-border");
+            isValid = false;
+          }
+
+          // --- Requirement 4: Confirmed Password Match Validation ---
+          const password = $("#password").val();
+          const confirmPassword = $("#confirmPassword").val();
+          const $confirmInput = $("#confirmPassword");
+
+          // This final block handles the logic for the Confirm Password field:
+          if (confirmPassword.trim() === "") {
+            // If empty, the first loop already handled it, but we ensure the message is correct.
+            displayInputError(
+              "confirmPassword",
+              "this field must not be empty"
+            );
+          } else if (password !== confirmPassword) {
+            // If not empty, but mismatch
+            displayInputError(
+              "confirmPassword",
+              "confirmed password mismatched the password"
+            );
+          } else {
+            // If not empty AND matches, ensure no error is displayed
+            // (If the first loop set isValid=false for another field, it remains false)
+            $("#confirmPassword").removeClass("error-border");
+            $("#confirmPassword-error").text("");
+          }
+
+          // --- Successful Submission (NO alert as requested) ---
+          if (isValid) {
+            // Form is successfully validated.
+            // In a real application, the form would be submitted here:
+            // $('#registrationForm').submit();
+
+            // For this assignment, we simply end the validation function successfully.
+            console.log("Form validated successfully.");
+          } else {
+            // For better UX, focus on the first invalid field
+            $(".error-border").first().focus();
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
